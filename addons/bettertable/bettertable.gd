@@ -1,0 +1,17 @@
+@tool
+extends EditorPlugin
+
+
+func _enter_tree() -> void:
+	add_custom_type(
+		"BetterTable",
+		"Control",
+		preload("res://addons/bettertable/better_table.gd"),
+		preload("res://addons/bettertable/table_icon.svg")
+	)
+
+
+func _exit_tree() -> void:
+	remove_custom_type("BetterTable")
+	remove_custom_type("BetterCell")
+	remove_custom_type("BetterColumn")
