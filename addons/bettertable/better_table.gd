@@ -2,11 +2,12 @@
 extends PanelContainer
 class_name BetterTable
 
+#region Signals
 signal row_double_clicked(row_dict:Dictionary)
 signal row_right_clicked(row_dict:Dictionary)
+#endregion
 
-
-
+#region Themes
 @export_group("Themes")
 @export var _mock_table:bool = false:
 	get: return _mock_table
@@ -41,7 +42,9 @@ signal row_right_clicked(row_dict:Dictionary)
 	set(value):
 		_columns_hsplit_theme = value
 		_update_column_hplit_theme()
+#endregion
 
+#region Themes callbacks
 func _enable_mock_table(state:bool) -> void:
 	if state:
 		var mock_data:Array[Dictionary]
@@ -72,22 +75,29 @@ func _update_cells_line_edit_theme() -> void:
 	if _cells_nodes.is_empty(): return
 	for cell in _cells_nodes:
 		cell.theme = _cell_line_edit_theme
+#endregion
 
+#region Public methods
 func set_data_source(dict_array:Array[Dictionary]) -> void:
 	_data_source = dict_array
 func get_data_source() -> Array[Dictionary]:
 	return _data_source
+#endregion
 
+#region Private variables
 var _data_source:Array[Dictionary]:
 	set(value):
 		_data_source = value
 		_sorted_data_source = _data_source.duplicate(true)
 var _sorted_data_source:Array[Dictionary]
+var _sorted_by:int = -1
+var _sorted_descending:bool = false
+#endregion
+
+#region Public variables
 var included_fields:PackedStringArray
 var columns_names:PackedStringArray
-
-var sorted_by:int = -1
-var sorted_descending:bool = false
+#endregion
 
 #region Structural Nodes
 
@@ -153,19 +163,19 @@ func _cell_to_dict(cell:_do_not_use_BetterCell) -> Dictionary:
 
 func sort_by_column(col_idx:int) -> void:
 	var field:String = included_fields[col_idx]
-	if sorted_by == col_idx:
-		if sorted_descending:
+	if _sorted_by == col_idx:
+		if _sorted_descending:
 			_sorted_data_source = _data_source.duplicate(true)
 			build_table()
-			sorted_by = -1
-			sorted_descending = false
+			_sorted_by = -1
+			_sorted_descending = false
 			return
-		sorted_descending = true
+		_sorted_descending = true
 		_sorted_data_source.sort_custom(func(a,b): return a[field] > b[field])
 		build_table()
 		return
-	sorted_by = col_idx
-	sorted_descending = false
+	_sorted_by = col_idx
+	_sorted_descending = false
 	_sorted_data_source.sort_custom(func(a,b): return a[field] < b[field])
 	build_table()
 
@@ -258,6 +268,7 @@ func _fill_table() -> void:
 
 #endregion
 
+#region Remove Row
 func remove_row(row_dict:Dictionary) -> void:
 	_data_source.erase(row_dict)
 	_sorted_data_source.erase(row_dict)
@@ -268,7 +279,9 @@ func remove_row_at(row_idx:int) -> void:
 	_sorted_data_source.remove_at(row_idx)
 	_data_source.erase(dict)
 	build_table()
+#endregion
 
+#region Build Table
 func build_table() -> void:
 	if not _properties_validations(): return
 
@@ -276,3 +289,4 @@ func build_table() -> void:
 	_clear_cells()
 	_add_columns()
 	_fill_table()
+#endregion
