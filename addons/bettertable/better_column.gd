@@ -7,7 +7,7 @@ var _vbc := VBoxContainer.new()
 func _init(_idx:int) -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
-	dragger_visibility = SplitContainer.DRAGGER_HIDDEN
+	#dragger_visibility = SplitContainer.DRAGGER_HIDDEN
 	add_child(_vbc)
 	_vbc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_vbc.size_flags_vertical = Control.SIZE_EXPAND_FILL
