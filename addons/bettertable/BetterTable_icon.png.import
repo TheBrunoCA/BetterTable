@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://circuk4nuktkw"
-path="res://.godot/imported/table_icon.svg-bce1101fcc16fff3753f3b79d004cc1d.ctex"
+uid="uid://b71e1sumyy1hc"
+path="res://.godot/imported/BetterTable_icon.png-0113057ddcb593154b796548172e99b0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/bettertable/table_icon.svg"
-dest_files=["res://.godot/imported/table_icon.svg-bce1101fcc16fff3753f3b79d004cc1d.ctex"]
+source_file="res://addons/bettertable/BetterTable_icon.png"
+dest_files=["res://.godot/imported/BetterTable_icon.png-0113057ddcb593154b796548172e99b0.ctex"]
 
 [params]
 
@@ -32,6 +32,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

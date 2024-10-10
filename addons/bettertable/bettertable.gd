@@ -7,7 +7,7 @@ func _enter_tree() -> void:
 		"BetterTable",
 		"Control",
 		preload("res://addons/bettertable/better_table.gd"),
-		preload("res://addons/bettertable/table_icon.svg")
+		preload("res://addons/bettertable/BetterTable_icon.png")
 	)
 
 
