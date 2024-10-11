@@ -80,6 +80,11 @@ func _update_cells_line_edit_theme() -> void:
 #region Public methods
 func set_data_source(dict_array:Array[Dictionary]) -> void:
 	_data_source = dict_array
+func set_data_source_from_object_array(obj_array:Array) -> void:
+	var dict_array:Array[Dictionary]
+	for item in obj_array:
+		dict_array.append(inst_to_dict(item))
+	set_data_source(dict_array)
 func get_data_source() -> Array[Dictionary]:
 	return _data_source
 #endregion
