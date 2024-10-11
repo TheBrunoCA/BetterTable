@@ -122,17 +122,17 @@ func _enter_tree() -> void:
 #region Nodes Initializers
 func _add_margin_container() -> void:
 	_mc.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(_mc)
+	if _mc.get_parent() != self: add_child(_mc)
 
 func _add_scroll_container() -> void:
 	_sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_sc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_mc.add_child(_sc)
+	if _sc.get_parent() != _mc: _mc.add_child(_sc)
 
 func _add_hbox_container() -> void:
 	_vbc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_vbc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_sc.add_child(_vbc)
+	if _vbc.get_parent() != _sc: _sc.add_child(_vbc)
 #endregion
 
 #region _on_cell_double_clicked()
