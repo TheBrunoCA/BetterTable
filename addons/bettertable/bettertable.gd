@@ -13,5 +13,3 @@ func _enter_tree() -> void:
 
 func _exit_tree() -> void:
 	remove_custom_type("BetterTable")
-	remove_custom_type("BetterCell")
-	remove_custom_type("BetterColumn")

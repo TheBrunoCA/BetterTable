@@ -17,6 +17,7 @@ func _init(_row_idx:int, _col_idx:int, _text:String) -> void:
 	row_idx = _row_idx
 	col_idx = _col_idx
 	text = _text
+	context_menu_enabled = false
 
 	if not InputMap.has_action(_double_click_action_name):
 		var action := InputEventMouseButton.new()
