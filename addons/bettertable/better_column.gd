@@ -1,5 +1,4 @@
 extends HSplitContainer
-class_name _do_not_use_BetterColumn
 
 var idx:int
 var _vbc := VBoxContainer.new()

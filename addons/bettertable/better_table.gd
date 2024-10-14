@@ -2,9 +2,13 @@
 extends PanelContainer
 class_name BetterTable
 
+const BetterCell := preload("res://addons/bettertable/better_cell.gd")
+const BetterColumn := preload("res://addons/bettertable/better_column.gd")
+
 #region Signals
 signal row_double_clicked(row_dict:Dictionary)
 signal row_right_clicked(row_dict:Dictionary)
+signal data_source_changed
 #endregion
 
 #region Themes
@@ -51,14 +55,12 @@ func _enable_mock_table(state:bool) -> void:
 		for i in range(0, _mock_data_count):
 			var dict := {ID=i, DESCRIPTION="MockDescription"+str(i), CATEGORY="MockCategory"+str(i)}
 			mock_data.append(dict)
-		set_data_source(mock_data)
 		included_fields = ["ID", "DESCRIPTION", "CATEGORY"]
-		build_table()
+		data_source = mock_data
 		return
-	_clear_cells()
 	_clear_columns()
-	set_data_source([])
 	included_fields = []
+	data_source = []
 
 func _update_headers_buttons_theme() -> void:
 	if _columns_nodes.is_empty(): return
@@ -77,23 +79,31 @@ func _update_cells_line_edit_theme() -> void:
 		cell.theme = _cell_line_edit_theme
 #endregion
 
-#region Public methods
-func set_data_source(dict_array:Array[Dictionary]) -> void:
-	_data_source = dict_array
-func set_data_source_from_object_array(obj_array:Array) -> void:
-	var dict_array:Array[Dictionary]
-	for item in obj_array:
-		dict_array.append(inst_to_dict(item))
-	set_data_source(dict_array)
-func get_data_source() -> Array[Dictionary]:
-	return _data_source
-#endregion
-
 #region Private variables
-var _data_source:Array[Dictionary]:
+var _data_source:Array[Dictionary]
+
+var data_source:Array[Dictionary]:
+	get: return _data_source
 	set(value):
-		_data_source = value
-		_sorted_data_source = _data_source.duplicate(true)
+		_data_source = value.duplicate(true)
+		_sorted_data_source = data_source.duplicate()
+		if included_fields.is_empty() and not data_source.is_empty():
+			included_fields = data_source[0].keys()
+		data_source_changed.emit()
+		sort()
+
+var obj_data_source:Array[Object]:
+	get:
+		var items:Array[Object]
+		for item in data_source:
+			items.append(dict_to_inst(item))
+		return items
+	set(value):
+		var items:Array[Dictionary]
+		for item in value:
+			items.append(inst_to_dict(item))
+		data_source = items
+
 var _sorted_data_source:Array[Dictionary]
 var _sorted_by:int = -1
 var _sorted_descending:bool = false
@@ -110,8 +120,8 @@ var _mc := MarginContainer.new()
 var _sc := ScrollContainer.new()
 var _vbc := VBoxContainer.new()
 
-var _columns_nodes:Array[_do_not_use_BetterColumn]
-var _cells_nodes:Array[_do_not_use_BetterCell]
+var _columns_nodes:Array[BetterColumn]
+var _cells_nodes:Array[BetterCell]
 
 #endregion
 
@@ -142,21 +152,21 @@ func _add_hbox_container() -> void:
 
 #region _on_cell_double_clicked()
 
-func _on_cell_double_clicked(cell:_do_not_use_BetterCell) -> void:
+func _on_cell_double_clicked(cell:BetterCell) -> void:
 	row_double_clicked.emit(_cell_to_dict(cell))
 
 #endregion
 
 #region _on_cell_right_clicked()
 
-func _on_cell_right_clicked(cell:_do_not_use_BetterCell) -> void:
+func _on_cell_right_clicked(cell:BetterCell) -> void:
 	row_right_clicked.emit(_cell_to_dict(cell))
 
 #endregion
 
 #region _cell_to_dict()
 
-func _cell_to_dict(cell:_do_not_use_BetterCell) -> Dictionary:
+func _cell_to_dict(cell:BetterCell) -> Dictionary:
 	var item_dict:Dictionary
 	for field in included_fields:
 		item_dict[field] = _data_source[cell.row_idx][field]
@@ -166,24 +176,35 @@ func _cell_to_dict(cell:_do_not_use_BetterCell) -> Dictionary:
 
 #region sort_by_column()
 
-func sort_by_column(col_idx:int) -> void:
-	var field:String = included_fields[col_idx]
-	if _sorted_by == col_idx:
-		if _sorted_descending:
-			_sorted_data_source = _data_source.duplicate(true)
-			build_table()
-			_sorted_by = -1
-			_sorted_descending = false
-			return
-		_sorted_descending = true
-		_sorted_data_source.sort_custom(func(a,b): return a[field] > b[field])
+func sort() -> void:
+	if _sorted_by < 0 or _sorted_by >= included_fields.size():
+		_sorted_data_source = data_source.duplicate()
 		build_table()
 		return
-	_sorted_by = col_idx
-	_sorted_descending = false
-	_sorted_data_source.sort_custom(func(a,b): return a[field] < b[field])
+
+	var field:String = included_fields[_sorted_by]
+	if _sorted_descending:
+		_sorted_data_source.sort_custom(func(a,b): return a[field] < b[field])
+	else:
+		_sorted_data_source.sort_custom(func(a,b): return a[field] > b[field])
+
 	build_table()
 
+func _on_header_pressed(col_idx:int) -> void:
+	if _sorted_by == col_idx:
+		if _sorted_descending:
+			_sorted_by = -1
+			_sorted_descending = false
+			sort()
+			return
+		else:
+			_sorted_descending = true
+			sort()
+			return
+	else:
+		_sorted_descending = false
+		_sorted_by = col_idx
+		sort()
 #endregion
 
 #region _properties_validation()
@@ -206,13 +227,13 @@ func _properties_validations() -> bool:
 #region _make_column()
 
 func _make_column(column_name:String) -> HSplitContainer:
-	var col := _do_not_use_BetterColumn.new(_columns_nodes.size())
+	var col := BetterColumn.new(_columns_nodes.size())
 	col.theme = _columns_hsplit_theme
 	var header := Button.new()
 	header.theme = _header_button_theme
 	header.text = column_name
 	col.add_cell(header)
-	header.pressed.connect(sort_by_column.bind(col.idx))
+	header.pressed.connect(_on_header_pressed.bind(col.idx))
 	return col
 
 #endregion
@@ -264,26 +285,13 @@ func _fill_table() -> void:
 			assert(dict.has(field), "included_field must contain only existing fields.")
 			if not dict.has(field): return
 
-			var cell := _do_not_use_BetterCell.new(dict_index, field_index, str(dict[field]))
+			var cell := BetterCell.new(dict_index, field_index, str(dict[field]))
 			cell.theme = _cell_line_edit_theme
 			_cells_nodes.append(cell)
 			_columns_nodes[field_index].add_cell(cell)
 			cell.double_clicked.connect(_on_cell_double_clicked)
 			cell.right_clicked.connect(_on_cell_right_clicked)
 
-#endregion
-
-#region Remove Row
-func remove_row(row_dict:Dictionary) -> void:
-	_data_source.erase(row_dict)
-	_sorted_data_source.erase(row_dict)
-	build_table()
-
-func remove_row_at(row_idx:int) -> void:
-	var dict := _sorted_data_source[row_idx]
-	_sorted_data_source.remove_at(row_idx)
-	_data_source.erase(dict)
-	build_table()
 #endregion
 
 #region Build Table

@@ -1,8 +1,9 @@
 extends LineEdit
-class_name _do_not_use_BetterCell
 
-signal double_clicked(cell:_do_not_use_BetterCell)
-signal right_clicked(cell:_do_not_use_BetterCell)
+const BetterCell := preload("res://addons/bettertable/better_cell.gd")
+
+signal double_clicked(cell:BetterCell)
+signal right_clicked(cell:BetterCell)
 
 var _double_click_action_name := "cell_double_left_click"
 var _right_click_action_name := "cell_right_click"
